@@ -29,10 +29,7 @@ class EncoderHandler:
         self.reverse = reverse
         self.click_timeout = click_timeout
 
-        self._serial = serial.Serial(
-            self.com_port, self.baud_rate, timeout=self.timeout
-        )
-
+        self._is_running = False
         self._last_position: int = 0
         self._button_state: int = 0
         self._button_pressed_at: float = 0.0
@@ -77,8 +74,13 @@ class EncoderHandler:
         self._button_state = state
 
     def start(self):
+        self._serial = serial.Serial(
+            self.com_port, self.baud_rate, timeout=self.timeout
+        )
+        self._is_running = True
+
         try:
-            while True:
+            while self._is_running:
                 line = self._serial.readline().decode().strip()
                 if len(line) == 0:
                     continue
@@ -88,10 +90,11 @@ class EncoderHandler:
                     self._handle_encoder(int(line[1:]))
                 elif line.startswith("b"):
                     self._handle_button(int(line[1:]))
-        except KeyboardInterrupt:
-            self._log("Exiting")
         finally:
             self._serial.close()
+
+    def stop(self):
+        self._is_running = False
 
 
 def parse_arguments():
@@ -125,17 +128,25 @@ def parse_arguments():
 def main():
     args = parse_arguments()
 
+    handler = EncoderHandler(
+        com_port=args.com,
+        baud_rate=args.baud,
+        reverse=args.reverse,
+        click_timeout=args.click_timeout,
+    )
+
     try:
-        handler = EncoderHandler(
-            com_port=args.com,
-            baud_rate=args.baud,
-            reverse=args.reverse,
-            click_timeout=args.click_timeout,
-        )
-        print("Listening on COM port", args.com)
-        handler.start()
-    except serial.SerialException:
-        print(f'Unable to open COM port "{args.com}"')
+        while True:
+            try:
+                print("Listening on COM port", args.com)
+                handler.start()
+            except serial.SerialException:
+                print(f'Unable to open COM port "{args.com}"')
+                time.sleep(0.5)
+    except KeyboardInterrupt:
+        print("Exiting")
+    finally:
+        handler.stop()
 
 
 if __name__ == "__main__":
