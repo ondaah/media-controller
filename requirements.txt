@@ -1,0 +1,6 @@
+keyboard==0.13.5
+pycodestyle==2.13.0
+pyserial==3.5
+ruff==0.11.13
+types-keyboard==0.13.2.20240310
+types-pyserial==3.5.0.20250326
