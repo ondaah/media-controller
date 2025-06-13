@@ -30,11 +30,22 @@ Since Arduino Nano does not have HID support, this project uses a custom python 
 
 ### Python
 
+#### Setting up the project
+
+0. Create a virtual environment.
 1. Open the python file in your favorite IDE.
-2. Install requirements from the `requirements.txt` file (don't forget to create a virtual environment).
+2. Install requirements from the `requirements.txt` file
 3. Run the python file (see `main.py --help` for available options).
 
 > Note: you can reverse the direction of the rotary encoder by passing `--reverse` flag to the python script, just in case if your encoder is placed in the different direction.
+
+#### Building an executable
+
+Run the following command to build an executable file. It will be saved in the `dist` folder.
+
+```bash
+pyinstaller --noconsole --onefile --name media_control main.py
+```
 
 ### Example pinout
 
